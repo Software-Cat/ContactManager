@@ -1,0 +1,1512 @@
+type: edu
+custom_name: stage4
+files:
+  - name: test/ContactsTest.java
+    visible: false
+    text: "import org.hyperskill.hstest.stage.StageTest;\nimport org.hyperskill.hstest.testcase.CheckResult;\n\
+    import org.hyperskill.hstest.testcase.TestCase;\n\nimport java.util.List;\nimport\
+    \ java.util.function.Function;\n\n\nclass TestClue {\n\n    Function<String, CheckResult>\
+    \ callback;\n\n    TestClue(Function<String, CheckResult> callback) {\n      \
+    \  this.callback = callback;\n    }\n}\n\n\npublic class ContactsTest extends\
+    \ StageTest<TestClue> {\n\n    private CheckResult splitActionsFeedback(int actualSize,\
+    \ int needSize) {\n        if (actualSize < needSize) {\n            return CheckResult.wrong(String.format(\"\
+    This test should contain at least %d actions, but you have only %d. \" +\n   \
+    \                         \"You should separate your actions with an empty line.\"\
+    ,\n                    needSize,\n                    actualSize));\n        }\
+    \ else {\n            return null;\n        }\n    }\n    \n    @Override\n  \
+    \  public List<TestCase<TestClue>> generate() {\n        return List.of (\n  \
+    \          new TestCase<TestClue>()\n                .setInput(\"exit\")\n   \
+    \             .setAttach(new TestClue(output -> {\n                    output\
+    \ = output.strip().toLowerCase();\n                    if (!output.contains(\"\
+    enter action\")) {\n                        return new CheckResult(false,\n  \
+    \                          \"No \\\"Enter action\\\" substring found in the output\"\
+    );\n                    }\n                    return CheckResult.correct();\n\
+    \                })),\n\n            new TestCase<TestClue>()\n              \
+    \  .setInput(\n                    \"count\\n\" +\n                    \"exit\"\
+    )\n                .setAttach(new TestClue(output -> {\n                    output\
+    \ = output.strip().toLowerCase();\n                    if (!output.contains(\"\
+    0 records\")) {\n                        return new CheckResult(false,\n     \
+    \                       \"No \\\"0 records\\\" substring found in the output.\
+    \ \" +\n                                    \"If you already have the database,\
+    \ try to delete it.\");\n                    }\n                    return CheckResult.correct();\n\
+    \                })),\n\n            new TestCase<TestClue>()\n              \
+    \  .setInput(\n                    \"add\\n\" +\n                        \"person\\\
+    n\" +\n                        \"John\\n\" +\n                        \"Smith\\\
+    n\" +\n                        \"\\n\" +\n                        \"\\n\" +\n\
+    \                        \"123 456 789\\n\" +\n                    \"count\\n\"\
+    \ +\n                    \"exit\")\n                .setAttach(new TestClue(output\
+    \ -> {\n                    output = output.strip().toLowerCase();\n         \
+    \           if (output.contains(\"0 records\")) {\n                        return\
+    \ new CheckResult(false,\n                            \"Can't add the person\"\
+    );\n                    }\n                    return CheckResult.correct();\n\
+    \                })),\n\n            new TestCase<TestClue>()\n              \
+    \  .setInput(\n                    \"add\\n\" +\n                        \"person\\\
+    n\" +\n                        \"John\\n\" +\n                        \"Smith\\\
+    n\" +\n                        \"\\n\" +\n                        \"\\n\" +\n\
+    \                        \"123 456 789\\n\" +\n                    \"list\\n\"\
+    \ +\n                    \"1\\n\" +\n                    \"menu\\n\" +\n     \
+    \               \"exit\")\n                .setAttach(new TestClue(output -> {\n\
+    \                    String[] blocks = output.strip().split(\"(\\\\s*\\\\n\\\\\
+    s*){2,}\");\n                    var feedback = splitActionsFeedback(blocks.length,\
+    \ 3);\n                    if (feedback != null) return feedback;\n\n        \
+    \            for (String infoBlock : blocks) {\n                        if (infoBlock.contains(\"\
+    Name: John\")\n                                && infoBlock.contains(\"Surname:\
+    \ Smith\")\n                                && infoBlock.contains(\"Birth date:\
+    \ [no data]\")\n                                && infoBlock.contains(\"Gender:\
+    \ [no data]\")\n                                && infoBlock.contains(\"Number:\
+    \ 123 456 789\")\n                                && infoBlock.contains(\"Time\
+    \ created:\")\n                                && infoBlock.contains(\"Time last\
+    \ edit:\")) {\n                            return CheckResult.correct();\n   \
+    \                     }\n                    }\n                    return new\
+    \ CheckResult(false,\n                            \"Something wrong with printing\
+    \ user info\");\n                })),\n\n            new TestCase<TestClue>()\n\
+    \                .setInput(\n                    \"add\\n\" +\n              \
+    \          \"organization\\n\" +\n                        \"Pizza Shop\\n\" +\n\
+    \                        \"Wall St. 1\\n\" +\n                        \"+0 (123)\
+    \ 456-789-9999\\n\" +\n                    \"list\\n\" +\n                   \
+    \ \"1\\n\" +\n                    \"menu\\n\" +\n                    \"exit\"\
+    )\n                .setAttach(new TestClue(output -> {\n                    String[]\
+    \ blocks = output.strip().split(\"(\\\\s*\\\\n\\\\s*){2,}\");\n              \
+    \      var feedback = splitActionsFeedback(blocks.length, 3);\n              \
+    \      if (feedback != null) return feedback;\n\n                    for (String\
+    \ infoBlock : blocks) {\n                        if (infoBlock.contains(\"Organization\
+    \ name: Pizza Shop\")\n                                && infoBlock.contains(\"\
+    Address: Wall St. 1\")\n                                && infoBlock.contains(\"\
+    Number: +0 (123) 456-789-9999\")\n                                && infoBlock.contains(\"\
+    Time created:\")\n                                && infoBlock.contains(\"Time\
+    \ last edit:\")) {\n                            return CheckResult.correct();\n\
+    \                        }\n                    }\n                    return\
+    \ new CheckResult(false,\n                            \"Something wrong with printing\
+    \ organization info\");\n                })),\n\n            new TestCase<TestClue>()\n\
+    \                .setInput(\n                    \"add\\n\" +\n              \
+    \          \"person\\n\" +\n                        \"John\\n\" +\n          \
+    \              \"Smith\\n\" +\n                        \"\\n\" +\n           \
+    \             \"\\n\" +\n                        \"123 456 789\\n\" +\n      \
+    \              \"list\\n\" +\n                    \"1\\n\" +\n               \
+    \     \"edit\\n\" +\n                        \"gender\\n\" +\n               \
+    \         \"M\\n\" +\n                    \"menu\\n\" +\n                    \"\
+    list\\n\" +\n                    \"1\\n\" +\n                    \"menu\\n\" +\n\
+    \                    \"exit\")\n                .setAttach(new TestClue(output\
+    \ -> {\n                    String[] blocks = output.strip().split(\"(\\\\s*\\\
+    \\n\\\\s*){2,}\");\n                    var feedback = splitActionsFeedback(blocks.length,\
+    \ 6);\n                    if (feedback != null) return feedback;\n\n        \
+    \            for (String infoBlock : blocks) {\n                        if (infoBlock.contains(\"\
+    Name: John\")\n                                && infoBlock.contains(\"Surname:\
+    \ Smith\")\n                                && infoBlock.contains(\"Birth date:\
+    \ [no data]\")\n                                && infoBlock.contains(\"Gender:\
+    \ M\")\n                                && infoBlock.contains(\"Number: 123 456\
+    \ 789\")\n                                && infoBlock.contains(\"Time created:\"\
+    )\n                                && infoBlock.contains(\"Time last edit:\"))\
+    \ {\n                            return CheckResult.correct();\n             \
+    \           }\n                    }\n                    return new CheckResult(false,\n\
+    \                            \"Editing person is not working\");\n           \
+    \     })),\n\n            new TestCase<TestClue>()\n                .setInput(\n\
+    \                    \"add\\n\" +\n                        \"organization\\n\"\
+    \ +\n                        \"Pizza Shop\\n\" +\n                        \"Wall\
+    \ St. 1\\n\" +\n                        \"+0 (123) 456-789-9999\\n\" +\n     \
+    \               \"list\\n\" +\n                    \"1\\n\" +\n              \
+    \      \"edit\\n\" +\n                        \"address\\n\" +\n             \
+    \           \"Wall St 2\\n\" +\n                    \"menu\\n\" +\n          \
+    \          \"list\\n\" +\n                    \"1\\n\" +\n                   \
+    \ \"menu\\n\" +\n                    \"exit\")\n                .setAttach(new\
+    \ TestClue(output -> {\n                    String[] blocks = output.strip().split(\"\
+    (\\\\s*\\\\n\\\\s*){2,}\");\n                    var feedback = splitActionsFeedback(blocks.length,\
+    \ 6);\n                    if (feedback != null) return feedback;\n\n        \
+    \            for (String infoBlock : blocks) {\n                        if (infoBlock.contains(\"\
+    Organization name: Pizza Shop\")\n                                && infoBlock.contains(\"\
+    Address: Wall St 2\")\n                                && infoBlock.contains(\"\
+    Number: +0 (123) 456-789-9999\")\n                                && infoBlock.contains(\"\
+    Time created:\")\n                                && infoBlock.contains(\"Time\
+    \ last edit:\")) {\n                            return CheckResult.correct();\n\
+    \                        }\n                    }\n                    return\
+    \ new CheckResult(false,\n                            \"Editing organization is\
+    \ not working\");\n                })),\n\n            new TestCase<TestClue>()\n\
+    \                .setInput(\n                    \"add\\n\" +\n              \
+    \          \"organization\\n\" +\n                        \"Pizza Shop\\n\" +\n\
+    \                        \"Wall St. 1\\n\" +\n                        \"+0 (123)\
+    \ 456-789-9999\\n\" +\n                    \"add\\n\" +\n                    \
+    \    \"person\\n\" +\n                        \"John\\n\" +\n                \
+    \        \"Smith\\n\" +\n                        \"\\n\" +\n                 \
+    \       \"\\n\" +\n                        \"123 456 789\\n\" +\n            \
+    \        \"add\\n\" +\n                        \"organization\\n\" +\n       \
+    \                 \"PizzaNuts\\n\" +\n                        \"Wall St. 6\\n\"\
+    \ +\n                        \"+0 (123) 456-789-9999\\n\" +\n                \
+    \    \"search\\n\" +\n                        \"pizz\\n\" +\n                \
+    \    \"1\\n\" +\n                    \"menu\\n\" +\n                    \"exit\"\
+    )\n                .setAttach(new TestClue(output -> {\n                    String[]\
+    \ blocks = output.strip().split(\"(\\\\s*\\\\n\\\\s*){2,}\");\n              \
+    \      var feedback = splitActionsFeedback(blocks.length, 4);\n              \
+    \      if (feedback != null) return feedback;\n    \n                    \n  \
+    \                  for (String infoBlock : blocks) {\n                       \
+    \ if (infoBlock.contains(\"Pizza Shop\")\n                                && infoBlock.contains(\"\
+    PizzaNuts\")\n                                && !infoBlock.contains(\"John\"\
+    )) {\n                            return CheckResult.correct();\n            \
+    \            }\n                    }\n                    return new CheckResult(false,\n\
+    \                            \"Search is not working\");\n                })),\n\
+    \n            new TestCase<TestClue>()\n                .setInput(\n         \
+    \           \"add\\n\" +\n                        \"organization\\n\" +\n    \
+    \                    \"Pizza Shop\\n\" +\n                        \"Wall St. 1\\\
+    n\" +\n                        \"+0 (123) 456-789-9999\\n\" +\n              \
+    \      \"add\\n\" +\n                        \"person\\n\" +\n               \
+    \         \"John\\n\" +\n                        \"Smith\\n\" +\n            \
+    \            \"\\n\" +\n                        \"\\n\" +\n                  \
+    \      \"123 456 789\\n\" +\n                    \"add\\n\" +\n              \
+    \          \"organization\\n\" +\n                        \"PizzaNuts\\n\" +\n\
+    \                        \"Wall St. 6\\n\" +\n                        \"+0 (123)\
+    \ 456-789-9999\\n\" +\n                    \"search\\n\" +\n                 \
+    \       \"s\\n\" +\n                    \"1\\n\" +\n                    \"menu\\\
+    n\" +\n                    \"exit\")\n                .setAttach(new TestClue(output\
+    \ -> {\n                    String[] blocks = output.strip().split(\"(\\\\s*\\\
+    \\n\\\\s*){2,}\");\n                    var feedback = splitActionsFeedback(blocks.length,\
+    \ 4);\n                    if (feedback != null) return feedback;\n\n        \
+    \            for (String infoBlock : blocks) {\n                        if (infoBlock.contains(\"\
+    Pizza Shop\")\n                                && infoBlock.contains(\"John Smith\"\
+    )\n                                && infoBlock.contains(\"PizzaNuts\")) {\n \
+    \                           return CheckResult.correct();\n                  \
+    \      }\n                    }\n                    return new CheckResult(false,\n\
+    \                            \"Search is not working\");\n                })),\n\
+    \n        new TestCase<TestClue>()\n            .setInput(\n                \"\
+    add\\n\" +\n                    \"organization\\n\" +\n                    \"\
+    Pizza Shop\\n\" +\n                    \"Wall St. 1\\n\" +\n                 \
+    \   \"+0 (123) 456-789-9999\\n\" +\n                \"add\\n\" +\n           \
+    \         \"person\\n\" +\n                    \"John\\n\" +\n               \
+    \     \"Smith\\n\" +\n                    \"\\n\" +\n                    \"\\\
+    n\" +\n                    \"123 456 789\\n\" +\n                \"add\\n\" +\n\
+    \                    \"organization\\n\" +\n                    \"PizzaNuts\\\
+    n\" +\n                    \"Wall St. 6\\n\" +\n                    \"+0 (123)\
+    \ 456-781-9999\\n\" +\n                \"search\\n\" +\n                    \"\
+    789\\n\" +\n                \"1\\n\" +\n                \"menu\\n\" +\n      \
+    \          \"exit\")\n            .setAttach(new TestClue(output -> {\n      \
+    \          String[] blocks = output.strip().split(\"(\\\\s*\\\\n\\\\s*){2,}\"\
+    );\n                var feedback = splitActionsFeedback(blocks.length, 4);\n \
+    \               if (feedback != null) return feedback;\n\n                for\
+    \ (String infoBlock : blocks) {\n                    if (infoBlock.contains(\"\
+    Pizza Shop\")\n                            && infoBlock.contains(\"John Smith\"\
+    )\n                            && !infoBlock.contains(\"PizzaNuts\")) {\n    \
+    \                    return CheckResult.correct();\n\n                    }\n\
+    \                }\n                return new CheckResult(false,\n          \
+    \              \"Search by phone number is not working\");\n            }))\n\
+    \        );\n    }\n\n    @Override\n    public CheckResult check(String reply,\
+    \ TestClue clue) {\n        try {\n            return clue.callback.apply(reply);\n\
+    \        }\n        catch (Exception ex) {\n            return new CheckResult(false,\
+    \ \"Can't check the answer\");\n        }\n    }\n}\n"
+    learner_created: false
+  - name: src/contacts/input/DateAsker.java
+    visible: true
+    text: |
+      package contacts.input;
+      
+      import org.jetbrains.annotations.NotNull;
+      import org.jetbrains.annotations.Nullable;
+      
+      import java.time.LocalDate;
+      import java.time.format.DateTimeParseException;
+      
+      public abstract class DateAsker extends InputAsker<LocalDate> {
+      
+          public DateAsker() {
+              super();
+          }
+      
+          public @Nullable LocalDate askForLocalDate(@NotNull String query) throws DateTimeParseException {
+              return LocalDate.parse(askForString(query));
+          }
+      }
+    learner_created: true
+  - name: src/contacts/util/PhoneNumberUtil.java
+    visible: true
+    text: |
+      package contacts.util;
+      
+      import org.jetbrains.annotations.NotNull;
+      import org.jetbrains.annotations.Nullable;
+      
+      import java.util.Arrays;
+      import java.util.List;
+      import java.util.regex.Pattern;
+      
+      public class PhoneNumberUtil {
+      
+          private static final Pattern GROUP_ONE = Pattern.compile("\\+?\\(?[a-zA-Z0-9]+\\)?");
+      
+          private static final Pattern GROUP_TWO_PLUS = Pattern.compile("\\(?[a-zA-Z0-9][a-zA-Z0-9]+\\)?");
+      
+          private static final Pattern HAS_PARENTHESIS = Pattern.compile("\\([a-zA-Z0-9]+\\)");
+      
+          private static final PhoneNumberUtil INSTANCE = new PhoneNumberUtil();
+      
+          private PhoneNumberUtil() {
+          }
+      
+          public static PhoneNumberUtil getInstance() {
+              return INSTANCE;
+          }
+      
+          public boolean isValid(@Nullable String phoneNumber) {
+              // Null check.
+              if (phoneNumber == null) {
+                  return false;
+              }
+      
+              // The phone number should be split into groups using a space or dash.
+              List<String> groups = splitGroups(phoneNumber);
+      
+              switch (groups.size()) {
+                  case 0 -> {
+                      // Phone number cannot be empty.
+                      return false;
+                  }
+                  case 1 -> {
+                      // Before the first group, there may or may not be a plus symbol.
+                      // The first group may be only one symbol in length.
+                      if (!GROUP_ONE.matcher(phoneNumber).matches()) {
+                          return false;
+                      }
+                  }
+                  default -> {
+                      // Two or more groups.
+                      // Before the first group, there may or may not be a plus symbol.
+                      // The first group may be only one symbol in length.
+                      if (!GROUP_ONE.matcher(groups.get(0)).matches()) {
+                          return false;
+                      }
+      
+                      // The first group, or the second group can be wrapped in parentheses,
+                      // but there should be no more than one group that is wrapped in parentheses.
+                      // There may also be no groups wrapped in parentheses.
+                      int parenthesizedGroups = 0;
+                      for (String group : groups) {
+                          if (HAS_PARENTHESIS.matcher(group).find()) {
+                              parenthesizedGroups++;
+                          }
+                      }
+      
+                      if (parenthesizedGroups > 1) {
+                          return false;
+                      }
+      
+                      for (String group : groups) {
+                          if (!areParenthesesPaired(group)) {
+                              return false;
+                          }
+                      }
+      
+                      // A group can contain numbers, uppercase and lowercase English letters.
+                      // A group should be at least 2 symbols in length.
+                      for (String group : groups.subList(1, groups.size())) {
+                          if (!GROUP_TWO_PLUS.matcher(group).matches()) {
+                              return false;
+                          }
+                      }
+                  }
+              }
+      
+              // If all tests passed, return true.
+              return true;
+          }
+      
+          private @NotNull List<String> splitGroups(@NotNull String phoneNumber) {
+              return Arrays.asList(phoneNumber.split("[ \\-]"));
+          }
+      
+          private boolean areParenthesesPaired(String group) {
+              char c = group.toCharArray()[group.length() - 1];
+              if (group.toCharArray()[0] == '(') {
+                  // If the group starts with a parenthesis, it must also end with one.
+                  return c == ')';
+              } else {
+                  // if the group does not start with a parenthesis, it should not end with one.
+                  return c != ')';
+              }
+          }
+      }
+    learner_created: true
+  - name: src/contacts/action/Command.java
+    visible: true
+    text: |
+      package contacts.action;
+      
+      import org.apache.logging.log4j.LogManager;
+      import org.apache.logging.log4j.Logger;
+      import org.jetbrains.annotations.Contract;
+      import org.jetbrains.annotations.NotNull;
+      import org.jetbrains.annotations.Nullable;
+      
+      import java.util.ArrayList;
+      import java.util.List;
+      
+      public enum Command {
+          ADD("add", new Add()),
+          REMOVE("remove", new Remove()),
+          EDIT("edit", new Edit()),
+          COUNT("count", new Count()),
+          LIST("list", new contacts.action.List()),
+          INFO("info", new Info()),
+          EXIT("exit", new Exit());
+      
+          private static final Logger logger = LogManager.getLogger(Command.class);
+      
+          @NotNull
+          private final String id;
+      
+          @NotNull
+          private final Action action;
+      
+          Command(@NotNull String id, @NotNull Action action) {
+              this.id = id;
+              this.action = action;
+          }
+      
+          public static @NotNull List<String> allCommandIds() {
+              List<String> commandIds = new ArrayList<>();
+              for (Command command : Command.values()) {
+                  commandIds.add(command.id);
+              }
+              return commandIds;
+          }
+      
+          public static @Nullable Command fromId(@NotNull String id) {
+              for (Command command : Command.values()) {
+                  if (command.getId().equals(id)) {
+                      return command;
+                  }
+              }
+      
+              // Command not found.
+              logger.error("Command '%s' not found!".formatted(id));
+              return null;
+          }
+      
+          @Contract(pure = true)
+          public @NotNull String getId() {
+              return id;
+          }
+      
+          @Contract(pure = true)
+          public @NotNull Action getAction() {
+              return action;
+          }
+      }
+    learner_created: true
+  - name: src/contacts/entry/field/StringField.java
+    visible: true
+    text: |
+      package contacts.entry.field;
+      
+      import contacts.input.StringAsker;
+      import org.jetbrains.annotations.NotNull;
+      import org.jetbrains.annotations.Nullable;
+      
+      import java.util.function.Supplier;
+      
+      public abstract class StringField extends ContactField<String> {
+      
+          public StringField(@NotNull String id, @NotNull String name, @NotNull Supplier<String> valueSupplier, @Nullable String value) {
+              super(id, name, valueSupplier, value);
+          }
+      
+          public StringField(@NotNull String id, @NotNull String name, @NotNull Supplier<String> valueSupplier) {
+              super(id, name, valueSupplier);
+          }
+      
+          public StringField(@NotNull String id, @NotNull String name) {
+              // Ignore this null warning, the next statement in line sets the value supplier,
+              // so no way it can be null.
+              super(id, name, null);
+      
+              setValueSupplier(new StringAsker(this));
+          }
+      }
+    learner_created: true
+  - name: src/contacts/input/action/IndexAsker.java
+    visible: true
+    text: |
+      package contacts.input.action;
+      
+      import contacts.input.InputAsker;
+      import lombok.Getter;
+      import lombok.Setter;
+      import org.apache.logging.log4j.LogManager;
+      import org.apache.logging.log4j.Logger;
+      import org.jetbrains.annotations.NotNull;
+      
+      public class IndexAsker extends InputAsker<Integer> {
+      
+          private static final Logger logger = LogManager.getLogger(IndexAsker.class);
+      
+          /**
+           * The minimum requirement for the index to be valid. (Inclusive)
+           */
+          @Getter
+          @Setter
+          private int minIndex;
+      
+          /**
+           * The maximum requirement for the index to be valid. (Exclusive)
+           */
+          @Getter
+          @Setter
+          private int maxIndex;
+      
+          /**
+           * @param minIndex the minimum requirement for the index to be valid. (Inclusive)
+           * @param maxIndex the maximum requirement for the index to be valid. (Exclusive)
+           */
+          public IndexAsker(int minIndex, int maxIndex) {
+              this.minIndex = minIndex;
+              this.maxIndex = maxIndex;
+          }
+      
+          @Override
+          public @NotNull Integer get() {
+              return askForIndexPersistent("Select a record");
+          }
+      
+          public int askForIndex(@NotNull String query) throws IllegalArgumentException {
+              int index = askForInt(query);
+      
+              if (index < minIndex || index >= maxIndex) {
+                  throw new IllegalArgumentException("Please enter a valid index!");
+              }
+      
+              return index;
+          }
+      
+          public int askForIndexPersistent(@NotNull String query) {
+              int result = 0;
+              boolean succeeded = false;
+      
+              while (!succeeded) {
+                  try {
+                      result = askForIndex(query);
+      
+                      // This line won't be reached if the index was not valid.
+                      succeeded = true;
+                  } catch (IllegalArgumentException e) {
+                      logger.error("Please enter a valid index!");
+                  }
+              }
+      
+              return result;
+          }
+      }
+    learner_created: true
+  - name: src/contacts/input/PhoneNumberAsker.java
+    visible: true
+    text: |
+      package contacts.input;
+      
+      import contacts.entry.field.PhoneNumber;
+      import org.apache.logging.log4j.LogManager;
+      import org.apache.logging.log4j.Logger;
+      import org.jetbrains.annotations.NotNull;
+      import org.jetbrains.annotations.Nullable;
+      
+      public class PhoneNumberAsker extends InputAsker<PhoneNumber> {
+      
+          private static final Logger logger = LogManager.getLogger(PhoneNumberAsker.class);
+      
+          public PhoneNumberAsker() {
+              super();
+          }
+      
+          @Override
+          public @Nullable PhoneNumber get() {
+              try {
+                  return askForPhoneNumber("Enter the number");
+              } catch (IllegalArgumentException e) {
+                  logger.error("Bad number!");
+                  return null;
+              }
+          }
+      
+          public @Nullable PhoneNumber askForPhoneNumber(@NotNull String query) throws IllegalArgumentException {
+              return new PhoneNumber(askForString(query));
+          }
+      }
+    learner_created: true
+  - name: src/contacts/entry/Contact.java
+    visible: true
+    text: |
+      package contacts.entry;
+      
+      import contacts.entry.field.ContactField;
+      import lombok.AccessLevel;
+      import lombok.Getter;
+      import lombok.Setter;
+      import org.apache.logging.log4j.LogManager;
+      import org.apache.logging.log4j.Logger;
+      import org.jetbrains.annotations.NotNull;
+      import org.jetbrains.annotations.Nullable;
+      
+      import java.time.LocalDateTime;
+      import java.time.temporal.ChronoUnit;
+      import java.util.ArrayList;
+      import java.util.Collections;
+      import java.util.List;
+      import java.util.StringJoiner;
+      
+      public abstract class Contact {
+      
+          private static final Logger logger = LogManager.getLogger(Contact.class);
+      
+          @Getter(AccessLevel.PROTECTED)
+          private final List<ContactField<?>> fields;
+      
+          @Getter
+          private final LocalDateTime timeCreated;
+      
+          @Getter
+          @Setter
+          private LocalDateTime timeLastEdit;
+      
+          public Contact(@NotNull List<ContactField<?>> fields) {
+              this.fields = Collections.unmodifiableList(fields);
+      
+              LocalDateTime now = LocalDateTime.now();
+              timeCreated = now;
+              timeLastEdit = now;
+          }
+      
+          /**
+           * Calls the supplier on all fields to try to fill them with initial values.
+           */
+          public void initialize() {
+              for (ContactField<?> field : fields) {
+                  field.updateValue();
+              }
+          }
+      
+          public @NotNull List<String> allFieldIds() {
+              List<String> fieldIds = new ArrayList<>();
+              for (ContactField<?> field : fields) {
+                  fieldIds.add(field.getId());
+              }
+              return fieldIds;
+          }
+      
+          public @Nullable ContactField<?> getFieldById(@NotNull String id) {
+              for (ContactField<?> field : fields) {
+                  if (field.getId().equals(id)) {
+                      return field;
+                  }
+              }
+      
+              // Field not found.
+              logger.error("Field '%s' not found!".formatted(id));
+              return null;
+          }
+      
+          @Override
+          public String toString() {
+              StringJoiner sj = new StringJoiner("\n");
+      
+              for (ContactField<?> field : fields) {
+                  sj.add(field.toString());
+              }
+      
+              sj.add("Time created: " + timeCreated.truncatedTo(ChronoUnit.DAYS));
+              sj.add("Time last edit: " + timeLastEdit.truncatedTo(ChronoUnit.DAYS));
+      
+              return sj.toString();
+          }
+      
+          public abstract @NotNull String getSimpleName();
+      }
+    learner_created: true
+  - name: src/contacts/input/BirthDateAsker.java
+    visible: true
+    text: |
+      package contacts.input;
+      
+      import org.apache.logging.log4j.LogManager;
+      import org.apache.logging.log4j.Logger;
+      import org.jetbrains.annotations.Nullable;
+      
+      import java.time.LocalDate;
+      import java.time.format.DateTimeParseException;
+      
+      public class BirthDateAsker extends DateAsker {
+      
+          private static final Logger logger = LogManager.getLogger(BirthDateAsker.class);
+      
+          public BirthDateAsker() {
+              super();
+          }
+      
+          @Override
+          public @Nullable LocalDate get() {
+              try {
+                  return askForLocalDate("Enter the birth date");
+              } catch (DateTimeParseException e) {
+                  logger.error("Bad birth date!");
+                  return null;
+              }
+          }
+      }
+    learner_created: true
+  - name: src/contacts/input/StringAsker.java
+    visible: true
+    text: |
+      package contacts.input;
+      
+      import contacts.entry.field.StringField;
+      import org.apache.logging.log4j.LogManager;
+      import org.apache.logging.log4j.Logger;
+      import org.jetbrains.annotations.Nullable;
+      
+      public class StringAsker extends InputAsker<String> {
+      
+          private static final Logger logger = LogManager.getLogger(StringAsker.class);
+      
+          private final StringField field;
+      
+          public StringAsker(StringField field) {
+              super();
+              this.field = field;
+          }
+      
+          @Override
+          public @Nullable String get() {
+              String result = askForString("Enter the " + field.getId());
+      
+              if (result.isBlank()) {
+                  logger.error("Bad " + field.getId() + "!");
+                  return null;
+              }
+      
+              return result;
+          }
+      }
+    learner_created: true
+  - name: src/contacts/base/PhoneBook.java
+    visible: true
+    text: |
+      package contacts.base;
+      
+      import contacts.entry.Contact;
+      
+      import java.util.ArrayList;
+      
+      public class PhoneBook extends ArrayList<Contact> {
+      
+      }
+    learner_created: true
+  - name: src/contacts/entry/Person.java
+    visible: true
+    text: |
+      package contacts.entry;
+      
+      import contacts.entry.field.*;
+      import org.jetbrains.annotations.NotNull;
+      
+      import java.util.List;
+      import java.util.StringJoiner;
+      
+      public class Person extends Contact {
+      
+          public Person() {
+              super(List.of(
+                      new FirstNameField(),
+                      new LastNameField(),
+                      new BirthDateField(),
+                      new GenderField(),
+                      new PhoneNumberField()
+              ));
+          }
+      
+          @Override
+          public @NotNull String getSimpleName() {
+              String firstName = null;
+              String lastName = null;
+      
+              if (!(getFields().get(0).getValue() == null)) {
+                  firstName = (String) getFields().get(0).getValue();
+              }
+              if (!(getFields().get(1).getValue() == null)) {
+                  lastName = (String) getFields().get(1).getValue();
+              }
+      
+              if (firstName == null && lastName == null) {
+                  return "[no data]";
+              } else {
+                  StringJoiner sj = new StringJoiner(" ");
+                  sj.add(firstName);
+                  sj.add(lastName);
+                  return sj.toString();
+              }
+          }
+      }
+    learner_created: true
+  - name: src/contacts/entry/field/OrganizationNameField.java
+    visible: true
+    text: |
+      package contacts.entry.field;
+      
+      import org.jetbrains.annotations.NotNull;
+      import org.jetbrains.annotations.Nullable;
+      
+      import java.util.function.Supplier;
+      
+      public class OrganizationNameField extends StringField {
+      
+          public OrganizationNameField(@NotNull Supplier<String> valueSupplier, @Nullable String value) {
+              super("name", "Organization name", valueSupplier, value);
+          }
+      
+          public OrganizationNameField(@NotNull Supplier<String> valueSupplier) {
+              this(valueSupplier, null);
+          }
+      
+          public OrganizationNameField() {
+              super("name", "Organization name");
+          }
+      }
+    learner_created: true
+  - name: src/contacts/entry/Organization.java
+    visible: true
+    text: "package contacts.entry;\n\nimport contacts.entry.field.AddressField;\nimport\
+    \ contacts.entry.field.OrganizationNameField;\nimport contacts.entry.field.PhoneNumberField;\n\
+    import org.jetbrains.annotations.NotNull;\n\nimport java.util.List;\n\npublic\
+    \ class Organization extends Contact {\n\n    public Organization() {\n      \
+    \  super(List.of(\n                new OrganizationNameField(),\n            \
+    \    new AddressField(),\n                new PhoneNumberField()\n        ));\n\
+    \    }\n    \n    @Override\n    public @NotNull String getSimpleName() {\n  \
+    \      Object nameObj = getFields().get(0).getValue();\n\n        if (nameObj\
+    \ == null) {\n            return \"[no data]\";\n        } else {\n          \
+    \  return (String) nameObj;\n        }\n    }\n}\n"
+    learner_created: true
+  - name: src/contacts/entry/field/FirstNameField.java
+    visible: true
+    text: |
+      package contacts.entry.field;
+      
+      import org.jetbrains.annotations.NotNull;
+      import org.jetbrains.annotations.Nullable;
+      
+      import java.util.function.Supplier;
+      
+      public class FirstNameField extends StringField {
+      
+          public FirstNameField(@NotNull Supplier<String> valueSupplier, @Nullable String value) {
+              super("name", "Name", valueSupplier, value);
+          }
+      
+          public FirstNameField(@NotNull Supplier<String> valueSupplier) {
+              this(valueSupplier, null);
+          }
+      
+          public FirstNameField() {
+              super("name", "Name");
+          }
+      }
+    learner_created: true
+  - name: src/contacts/input/GenderAsker.java
+    visible: true
+    text: |
+      package contacts.input;
+      
+      import contacts.entry.field.Gender;
+      import org.apache.logging.log4j.LogManager;
+      import org.apache.logging.log4j.Logger;
+      import org.jetbrains.annotations.NotNull;
+      import org.jetbrains.annotations.Nullable;
+      
+      public class GenderAsker extends InputAsker<Gender> {
+      
+          private static final Logger logger = LogManager.getLogger(GenderAsker.class);
+      
+          public GenderAsker() {
+              super();
+          }
+      
+          @Override
+          public @Nullable Gender get() {
+              try {
+                  return askForGender("Enter the gender (M, F)");
+              } catch (IllegalArgumentException e) {
+                  logger.error("Bad gender!");
+                  return null;
+              }
+          }
+      
+          public @Nullable Gender askForGender(@NotNull String query) throws IllegalArgumentException {
+              switch (askForString(query)) {
+                  case "M" -> {
+                      return Gender.MALE;
+                  }
+                  case "F" -> {
+                      return Gender.FEMALE;
+                  }
+                  default -> throw new IllegalArgumentException();
+              }
+          }
+      }
+    learner_created: true
+  - name: src/contacts/action/Add.java
+    visible: true
+    text: |
+      package contacts.action;
+      
+      import contacts.base.Application;
+      import contacts.entry.Organization;
+      import contacts.entry.Person;
+      import contacts.input.action.AddAsker;
+      import org.apache.logging.log4j.LogManager;
+      import org.apache.logging.log4j.Logger;
+      import org.jetbrains.annotations.NotNull;
+      
+      class Add implements Action {
+      
+          private static final Logger logger = LogManager.getLogger(Add.class);
+      
+          private final AddAsker asker = new AddAsker();
+      
+          public Add() {
+      
+          }
+      
+          @Override
+          public void accept(@NotNull Application app) {
+              switch (asker.get()) {
+                  case PERSON -> {
+                      Person person = new Person();
+                      person.initialize();
+                      app.getPhoneBook().add(person);
+                  }
+                  case ORGANIZATION -> {
+                      Organization organization = new Organization();
+                      organization.initialize();
+                      app.getPhoneBook().add(organization);
+                  }
+              }
+      
+              logger.info("The record added.");
+          }
+      }
+    learner_created: true
+  - name: src/contacts/entry/field/BirthDateField.java
+    visible: true
+    text: |
+      package contacts.entry.field;
+      
+      import contacts.input.BirthDateAsker;
+      import org.jetbrains.annotations.NotNull;
+      import org.jetbrains.annotations.Nullable;
+      
+      import java.time.LocalDate;
+      import java.util.function.Supplier;
+      
+      public class BirthDateField extends ContactField<LocalDate> {
+      
+          public BirthDateField(@NotNull Supplier<LocalDate> valueSupplier, @Nullable LocalDate value) {
+              super("birth", "Birth date", valueSupplier, value);
+          }
+      
+          public BirthDateField(@NotNull Supplier<LocalDate> valueSupplier) {
+              this(valueSupplier, null);
+          }
+      
+          public BirthDateField() {
+              super("birth", "Birth date", new BirthDateAsker());
+          }
+      }
+    learner_created: true
+  - name: src/contacts/input/InputAsker.java
+    visible: true
+    text: |
+      package contacts.input;
+      
+      import lombok.AllArgsConstructor;
+      import lombok.Getter;
+      import lombok.Setter;
+      import org.apache.logging.log4j.LogManager;
+      import org.apache.logging.log4j.Logger;
+      import org.jetbrains.annotations.NotNull;
+      import org.jetbrains.annotations.Nullable;
+      
+      import java.util.Scanner;
+      import java.util.function.Supplier;
+      
+      @AllArgsConstructor
+      public abstract class InputAsker<T> implements Supplier<T> {
+      
+          private static final Logger logger = LogManager.getLogger(InputAsker.class);
+      
+          @NotNull
+          private final Scanner scanner = new Scanner(System.in);
+      
+          @Getter
+          @Setter
+          @NotNull
+          private String inputPrompt;
+      
+          public InputAsker() {
+              this(": > ");
+          }
+      
+          /**
+           * Asks the user for a {@link String} response.
+           *
+           * @param query the query to prompt to the user.
+           * @return the integer entered by the user.
+           */
+          public @NotNull String askForString(@NotNull String query) {
+              System.out.print(query);
+              printInputPrompt();
+              return scanner.nextLine();
+          }
+      
+          /**
+           * Asks the user for an {@link Integer} response. Fails if the user input is not valid.
+           *
+           * @param query the query to prompt to the user
+           * @return the integer entered by the user.
+           * @throws NumberFormatException if the user input does not contain a parsable integer.
+           */
+          public int askForInt(@NotNull String query) throws NumberFormatException {
+              return Integer.parseInt(askForString(query));
+          }
+      
+          /**
+           * Asks the user for an {@link Integer} response. Keeps asking until the user enters a valid input.
+           *
+           * @param query the query to prompt to the user
+           * @return the integer entered by the user.
+           */
+          public int askForIntPersistent(@NotNull String query) {
+              int result = 0;
+              boolean succeeded = false;
+      
+              while (!succeeded) {
+                  try {
+                      result = askForInt(query);
+      
+                      // This line won't be reached if the integer was not valid.
+                      succeeded = true;
+                  } catch (NumberFormatException e) {
+                      logger.error("Please enter a valid integer!");
+                  }
+              }
+      
+              return result;
+          }
+      
+          @Override
+          public abstract @Nullable T get();
+      
+          private void printInputPrompt() {
+              System.out.print(inputPrompt);
+          }
+      }
+    learner_created: true
+  - name: src/contacts/entry/field/ContactField.java
+    visible: true
+    text: |
+      package contacts.entry.field;
+      
+      import lombok.AllArgsConstructor;
+      import lombok.Data;
+      import org.jetbrains.annotations.NotNull;
+      import org.jetbrains.annotations.Nullable;
+      
+      import java.util.function.Supplier;
+      
+      @Data
+      @AllArgsConstructor
+      public abstract class ContactField<T> {
+      
+          @NotNull
+          private final String id;
+      
+          @NotNull
+          private final String name;
+      
+          @Nullable
+          private Supplier<T> valueSupplier;
+      
+          @Nullable
+          private T value;
+      
+          public ContactField(@NotNull String id, @NotNull String name, @Nullable Supplier<T> valueSupplier) {
+              this.id = id;
+              this.name = name;
+              this.valueSupplier = valueSupplier;
+          }
+      
+          public void updateValue() {
+              value = valueSupplier.get();
+          }
+      
+          @Override
+          public String toString() {
+              // The value.toString() method may produce NPE, but here the value == null
+              // check prevents it from ever executing. The OR operator returns early if
+              // value == null.
+              if (value == null || value.toString().isBlank()) {
+                  return name + ": [no data]";
+              }
+              return name + ": " + value;
+          }
+      }
+    learner_created: true
+  - name: src/contacts/entry/field/GenderField.java
+    visible: true
+    text: |
+      package contacts.entry.field;
+      
+      import contacts.input.GenderAsker;
+      import org.jetbrains.annotations.NotNull;
+      import org.jetbrains.annotations.Nullable;
+      
+      import java.util.function.Supplier;
+      
+      public class GenderField extends ContactField<Gender> {
+      
+          public GenderField(@NotNull Supplier<Gender> valueSupplier, @Nullable Gender value) {
+              super("gender", "Gender", valueSupplier, value);
+          }
+      
+          public GenderField(@NotNull String id, @NotNull String name, @NotNull Supplier<Gender> valueSupplier) {
+              this(valueSupplier, null);
+          }
+      
+          public GenderField() {
+              super("gender", "Gender", new GenderAsker());
+          }
+      }
+    learner_created: true
+  - name: src/contacts/input/action/FieldAsker.java
+    visible: true
+    text: |
+      package contacts.input.action;
+      
+      import contacts.input.InputAsker;
+      import lombok.Getter;
+      import lombok.Setter;
+      import org.apache.logging.log4j.LogManager;
+      import org.apache.logging.log4j.Logger;
+      import org.jetbrains.annotations.NotNull;
+      
+      import java.util.ArrayList;
+      import java.util.Collection;
+      import java.util.List;
+      import java.util.StringJoiner;
+      
+      public class FieldAsker extends InputAsker<String> {
+      
+          private static final Logger logger = LogManager.getLogger(FieldAsker.class);
+      
+          @Getter
+          @Setter
+          @NotNull
+          private List<String> validFields;
+      
+          public FieldAsker(@NotNull Collection<String> validFields) {
+              this.validFields = new ArrayList<>(validFields);
+          }
+      
+          public FieldAsker() {
+              this(new ArrayList<>());
+          }
+      
+          @Override
+          public @NotNull String get() {
+              StringJoiner sj = new StringJoiner(", ");
+              for (String field : validFields) {
+                  sj.add(field);
+              }
+              return askForFieldPersistent("Select a field (" + sj + ")");
+          }
+      
+          public @NotNull String askForField(@NotNull String query) throws IllegalArgumentException {
+              String result = askForString(query);
+      
+              if (!validFields.contains(result)) {
+                  throw new IllegalArgumentException("Please enter a valid field!");
+              }
+      
+              return result;
+          }
+      
+          public @NotNull String askForFieldPersistent(@NotNull String query) {
+              String result = null;
+              boolean succeeded = false;
+      
+              while (!succeeded) {
+                  try {
+                      result = askForField(query);
+      
+                      // This line won't be reached if the index was not valid.
+                      succeeded = true;
+                  } catch (IllegalArgumentException e) {
+                      logger.error("Please enter a valid field!");
+                  }
+              }
+      
+              return result;
+          }
+      }
+    learner_created: true
+  - name: src/contacts/base/Application.java
+    visible: true
+    text: |
+      package contacts.base;
+      
+      import contacts.action.Command;
+      import contacts.input.action.CommandAsker;
+      import lombok.Getter;
+      import lombok.Setter;
+      
+      public class Application implements Runnable {
+      
+          @Getter
+          private final PhoneBook phoneBook = new PhoneBook();
+      
+          private final CommandAsker commandAsker = new CommandAsker();
+      
+          @Setter
+          private boolean running = true;
+      
+          @Override
+          public void run() {
+              while (running) {
+                  Command command = commandAsker.get();
+                  command.getAction().accept(this);
+                  System.out.println();
+              }
+          }
+      }
+    learner_created: true
+  - name: src/main/resources/log4j2.xml
+    visible: true
+    text: |
+      <Configuration xmlns="http://logging.apache.org/log4j/2.0/config">
+          <Appenders>
+              <Console name="stdout" target="SYSTEM_OUT">
+                  <PatternLayout pattern="%m%n"/>
+              </Console>
+          </Appenders>
+          <Loggers>
+              <Root level="info">
+                  <AppenderRef ref="stdout"/>
+              </Root>
+          </Loggers>
+      </Configuration>
+    learner_created: true
+  - name: src/contacts/entry/field/PhoneNumber.java
+    visible: true
+    text: |
+      package contacts.entry.field;
+      
+      import contacts.util.PhoneNumberUtil;
+      import lombok.AccessLevel;
+      import lombok.Getter;
+      import lombok.Value;
+      import org.jetbrains.annotations.NotNull;
+      
+      @Value
+      public class PhoneNumber {
+      
+          private static final PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+      
+          @Getter(AccessLevel.PRIVATE)
+          @NotNull
+          String phoneNumber;
+      
+          public PhoneNumber(@NotNull String phoneNumber) throws IllegalArgumentException {
+              if (!phoneUtil.isValid(phoneNumber)) {
+                  throw new IllegalArgumentException("Wrong number format!");
+              }
+              this.phoneNumber = phoneNumber;
+          }
+      
+          @Override
+          public @NotNull String toString() {
+              return phoneNumber;
+          }
+      }
+    learner_created: true
+  - name: src/contacts/entry/field/AddressField.java
+    visible: true
+    text: |
+      package contacts.entry.field;
+      
+      import org.jetbrains.annotations.NotNull;
+      import org.jetbrains.annotations.Nullable;
+      
+      import java.util.function.Supplier;
+      
+      public class AddressField extends StringField {
+      
+          public AddressField(@NotNull Supplier<String> valueSupplier, @Nullable String value) {
+              super("address", "Address", valueSupplier, value);
+          }
+      
+          public AddressField(@NotNull Supplier<String> valueSupplier) {
+              this(valueSupplier, null);
+          }
+      
+          public AddressField() {
+              super("address", "Address");
+          }
+      }
+    learner_created: true
+  - name: src/contacts/input/action/CommandAsker.java
+    visible: true
+    text: |
+      package contacts.input.action;
+      
+      import contacts.action.Command;
+      import contacts.input.InputAsker;
+      import org.apache.logging.log4j.LogManager;
+      import org.apache.logging.log4j.Logger;
+      import org.jetbrains.annotations.NotNull;
+      import org.jetbrains.annotations.Nullable;
+      
+      import java.util.List;
+      import java.util.StringJoiner;
+      
+      public class CommandAsker extends InputAsker<Command> {
+      
+          private static final Logger logger = LogManager.getLogger(CommandAsker.class);
+      
+          @NotNull
+          private final List<String> validFields = Command.allCommandIds();
+      
+          @Override
+          public @Nullable Command get() {
+              StringJoiner sj = new StringJoiner(", ");
+              for (String field : validFields) {
+                  sj.add(field);
+              }
+              return askForCommandPersistent("Enter action (" + sj + ")");
+          }
+      
+          public @NotNull Command askForCommand(@NotNull String query) throws IllegalArgumentException {
+              String result = askForString(query);
+      
+              if (!validFields.contains(result)) {
+                  throw new IllegalArgumentException("Please enter a valid action!");
+              }
+      
+              return Command.fromId(result);
+          }
+      
+          public @NotNull Command askForCommandPersistent(@NotNull String query) {
+              Command result = null;
+              boolean succeeded = false;
+      
+              while (!succeeded) {
+                  try {
+                      result = askForCommand(query);
+      
+                      // This line won't be reached if the index was not valid.
+                      succeeded = true;
+                  } catch (IllegalArgumentException e) {
+                      logger.error("Please enter a valid action!");
+                  }
+              }
+      
+              return result;
+          }
+      }
+    learner_created: true
+  - name: src/contacts/entry/field/Gender.java
+    visible: true
+    text: |
+      package contacts.entry.field;
+      
+      import com.google.common.base.CaseFormat;
+      
+      public enum Gender {
+          MALE,
+          FEMALE;
+      
+          @Override
+          public String toString() {
+              return CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, name());
+          }
+      }
+    learner_created: true
+  - name: src/contacts/action/Action.java
+    visible: true
+    text: |
+      package contacts.action;
+      
+      import contacts.base.Application;
+      import org.jetbrains.annotations.NotNull;
+      
+      import java.util.function.Consumer;
+      
+      @FunctionalInterface
+      public interface Action extends Consumer<Application> {
+      
+          @Override
+          void accept(@NotNull Application app);
+      }
+    learner_created: true
+  - name: src/contacts/entry/field/PhoneNumberField.java
+    visible: true
+    text: |
+      package contacts.entry.field;
+      
+      import contacts.input.PhoneNumberAsker;
+      import org.jetbrains.annotations.NotNull;
+      import org.jetbrains.annotations.Nullable;
+      
+      import java.util.function.Supplier;
+      
+      public class PhoneNumberField extends ContactField<PhoneNumber> {
+      
+          public PhoneNumberField(@NotNull Supplier<PhoneNumber> valueSupplier, @Nullable PhoneNumber value) {
+              super("number", "Number", valueSupplier, value);
+          }
+      
+          public PhoneNumberField(@NotNull Supplier<PhoneNumber> valueSupplier) {
+              this(valueSupplier, null);
+          }
+      
+          public PhoneNumberField() {
+              super("number", "Number", new PhoneNumberAsker());
+          }
+      }
+    learner_created: true
+  - name: src/contacts/input/action/AddAsker.java
+    visible: true
+    text: |
+      package contacts.input.action;
+      
+      import contacts.input.InputAsker;
+      import org.apache.logging.log4j.LogManager;
+      import org.apache.logging.log4j.Logger;
+      import org.jetbrains.annotations.NotNull;
+      
+      public class AddAsker extends InputAsker<AddAsker.ContactType> {
+      
+          private static final Logger logger = LogManager.getLogger(AddAsker.class);
+      
+          public AddAsker() {
+              super();
+          }
+      
+          @Override
+          public @NotNull AddAsker.ContactType get() {
+              return askForContactTypePersistent("Enter the type (person, organization)");
+          }
+      
+          public @NotNull ContactType askForContactType(@NotNull String query) throws IllegalArgumentException {
+              switch (askForString(query)) {
+                  case "person" -> {
+                      return ContactType.PERSON;
+                  }
+                  case "organization" -> {
+                      return ContactType.ORGANIZATION;
+                  }
+                  default -> throw new IllegalArgumentException("Please enter a valid contact type!");
+              }
+          }
+      
+          public @NotNull ContactType askForContactTypePersistent(@NotNull String query) {
+              ContactType result = null;
+              boolean succeeded = false;
+      
+              while (!succeeded) {
+                  try {
+                      result = askForContactType(query);
+      
+                      // This line won't be reached if the contact type was not valid.
+                      succeeded = true;
+                  } catch (IllegalArgumentException e) {
+                      logger.error("Please enter a valid contact type!");
+                  }
+              }
+      
+              return result;
+          }
+      
+          public enum ContactType {
+              PERSON,
+              ORGANIZATION
+          }
+      }
+    learner_created: true
+  - name: src/contacts/Main.java
+    visible: true
+    text: |
+      package contacts;
+      
+      public class Main {
+          public static void main(String[] args) {
+              System.out.println("Hello World!");
+          }
+      }
+    learner_created: false
+  - name: src/contacts/action/mode/ModeManager.java
+    visible: true
+    learner_created: true
+  - name: src/contacts/action/mode/Mode.java
+    visible: true
+    learner_created: true
+  - name: src/contacts/action/Search.java
+    visible: true
+    learner_created: true
+  - name: src/contacts/input/action/SearchAsker.java
+    visible: true
+    learner_created: true
+  - name: src/contacts/action/mode/MenuMode.java
+    visible: true
+    learner_created: true
+  - name: src/contacts/action/ListAction.java
+    visible: true
+    text: |
+      package contacts.action;
+      
+      import contacts.base.Application;
+      import contacts.entry.Contact;
+      import org.apache.logging.log4j.LogManager;
+      import org.apache.logging.log4j.Logger;
+      import org.jetbrains.annotations.NotNull;
+      
+      class List implements Action {
+      
+          private static final Logger logger = LogManager.getLogger(List.class);
+      
+          public List() {
+      
+          }
+      
+          @Override
+          public void accept(@NotNull Application app) {
+              // Null check.
+              if (app.getPhoneBook().size() == 0) {
+                  logger.warn("No records to list!");
+              }
+      
+              int index = 1;
+              for (Contact contact : app.getPhoneBook()) {
+                  System.out.println(index + ". " + contact.getSimpleName());
+                  index++;
+              }
+          }
+      }
+    learner_created: true
+  - name: src/contacts/input/action/mode/SearchModeAsker.java
+    visible: true
+    learner_created: true
+  - name: src/contacts/input/action/mode/MenuModeAsker.java
+    visible: true
+    learner_created: true
+  - name: src/contacts/input/action/mode/RecordModeAsker.java
+    visible: true
+    learner_created: true
+  - name: src/contacts/input/action/mode/ListModeAsker.java
+    visible: true
+    learner_created: true
+feedback_link: https://hyperskill.org/learn/step/5327#comment
+status: Solved
+feedback:
+  message: Well done! You've finished the project. Select a new project on <a href="https://hyperskill.org/projects">JetBrains
+    Academy</a> to continue learning.
+  time: Mon, 24 Jan 2022 04:11:14 UTC
+record: -1
